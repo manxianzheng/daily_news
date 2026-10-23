@@ -1,0 +1,35 @@
+name: Daily Hot Topics Digest
+
+on:
+  schedule:
+    # UTC 时间 00:00 对应北京时间每天早上 08:00
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 允许在 GitHub Actions 页面随时手动点击运行测试
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_push_digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 2. 配置 Python 环境与缓存
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 3. 安装依赖库
+        run: pip install -r requirements.txt
+
+      - name: 4. 采集热榜并生成推送日报
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+        run: python main.py
