@@ -7,7 +7,7 @@ on:
   workflow_dispatch: # 允许在 GitHub Actions 页面随时手动点击运行测试
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build_and_push_digest:
@@ -33,3 +33,11 @@ jobs:
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
         run: python main.py
+
+      - name: 5. 自动将日报归档并提交到 Git 仓库
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/ README.md
+          # 检查是否有新文件，有则提交推送
+          git diff --quiet && git diff --staged --quiet || (git commit -m "docs: 自动归档 $(date +'%Y-%m-%d') 日报" && git push)
