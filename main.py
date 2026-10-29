@@ -199,7 +199,17 @@ def push_notifications(report_md):
             f.write(report_md + "\n")
         print("已写入 GitHub Actions Job Summary 预览页。")
 
-    # 2. 保存最新日报到本地文件
+    # 2. 自动创建 reports 文件夹并保存归档日报
+    output_dir = "reports"
+    os.makedirs(output_dir, exist_ok=True)  # 目录不存在会自动创建
+    
+    today_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d")
+    archive_path = os.path.join(output_dir, f"{today_str}.md")
+    
+    with open(archive_path, "w", encoding="utf-8") as f:
+        f.write(report_md)
+    print(f"已生成归档日报文件: {archive_path}")
+    # 同时保留一份 latest_report.md 供快速查看
     with open("latest_report.md", "w", encoding="utf-8") as f:
         f.write(report_md)
 
